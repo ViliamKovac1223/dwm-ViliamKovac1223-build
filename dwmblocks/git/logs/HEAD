@@ -1,0 +1,8 @@
+0000000000000000000000000000000000000000 96cbb453e5373c05372fd4bf3faacfa53e409067 user <user@user-VirtualBox.(none)> 1641343967 +0100	clone: from https://github.com/torrinfail/dwmblocks.git
+96cbb453e5373c05372fd4bf3faacfa53e409067 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296334 +0200	commit: renaming blocks.def.h to config.def.h
+207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296369 +0200	reset: moving to HEAD
+207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296372 +0200	reset: moving to HEAD
+207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296395 +0200	reset: moving to 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13
+207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296408 +0200	reset: moving to 207b2bd01a9fbfcc8901b46268301a5b9e6b4c13
+207b2bd01a9fbfcc8901b46268301a5b9e6b4c13 773bb6159d1cab8616dbd2f87c55d3ffb5bf4bb1 ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296653 +0200	commit: make config
+773bb6159d1cab8616dbd2f87c55d3ffb5bf4bb1 8744a68f0439a948837ae16988aef4d13c28eb7c ViliamKovac1223 <viliamkovac1223@gmail.com> 1657296847 +0200	commit (merge): blocks.h to config.h

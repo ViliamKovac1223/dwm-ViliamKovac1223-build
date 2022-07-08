@@ -1,0 +1,58 @@
+# dwm - dynamic window manager
+
+dwm is an extremely fast, small, and dynamic window manager for X.
+
+# Defaults
+- Terminal = st
+- Launcher = dmenu
+Default fonts are sans, JoyPixels, hack, IcoMoon-free.
+For default key-bindings check config.def.h.
+
+# Patches
+I modified some patches.
+
+List of applied patches:
+- [Actual full screen](https://dwm.suckless.org/patches/actualfullscreen/)
+- [Auto start](https://dwm.suckless.org/patches/autostart/)
+- [Awesome bar](https://dwm.suckless.org/patches/awesomebar/)
+- [Bottom stack](https://dwm.suckless.org/patches/bottomstack/)
+- [Cycle layouts](https://dwm.suckless.org/patches/cyclelayouts/)
+- [Full gaps](https://dwm.suckless.org/patches/fullgaps/)
+- [Grid mode](https://dwm.suckless.org/patches/gridmode/)
+- [Maximize](https://dwm.suckless.org/patches/maximize/)
+- [Pertag](https://dwm.suckless.org/patches/pertag/)
+- [Restarting](https://dwm.suckless.org/patches/restartsig/)
+- [Systray](https://dwm.suckless.org/patches/systray/)
+
+# Dwmblocks
+Dwmblocks is modular status bar written by [torrinfail](https://github.com/torrinfail/dwmblocks).
+This project use my fork of dwmblocks.
+
+# Requirements
+In order to build dwm you need the Xlib header files.
+
+# Installation
+Edit config.mk to match your local setup (dwm is installed into
+the /usr/local namespace by default).
+
+Afterwards enter the following command to build and install dwm (if
+necessary as root):
+
+    make clean install
+
+
+# Running dwm
+Add the following line to your .xinitrc to start dwm using startx:
+
+    exec dwm
+
+In order to connect dwm to a specific display, make sure that
+the DISPLAY environment variable is set correctly, e.g.:
+
+    DISPLAY=foo.bar:1 exec dwm
+
+(This will start dwm on display :1 of the host foo.bar.)
+
+# Configuration
+The configuration of dwm is done in config.def.h
+and (re)compiling the source code (don't forget to delete config.h before compiling).
