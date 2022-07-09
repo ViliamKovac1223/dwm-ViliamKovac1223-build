@@ -2382,7 +2382,7 @@ drawTab(int nwins, int first, Monitor *m)
 	for (int i = 0;i < m->nTabs;i++) { /* draw all clients into tabwin */
 		c = m->altsnext[i];
 		if(!ISVISIBLE(c)) continue;
-		/* if (HIDDEN(c)) continue; uncomment if you're using awesomebar patch */
+		if (HIDDEN(c)) continue; /* uncomment if you're using awesomebar patch */
 
 		n++;
 		drw_setscheme(drw, scheme[(c == m->sel) ? SchemeSel : SchemeNorm]);
@@ -2413,7 +2413,7 @@ altTabStart(const Arg *arg)
 		m->nTabs = 0;
 		for(c = m->clients; c; c = c->next) { /* count clients */
 			if(!ISVISIBLE(c)) continue;
-			/* if (HIDDEN(c)) continue; uncomment if you're using awesomebar patch */
+			if (HIDDEN(c)) continue; /* uncomment if you're using awesomebar patch */
 
 			++m->nTabs;
 		}
@@ -2424,7 +2424,7 @@ altTabStart(const Arg *arg)
 			int listIndex = 0;
 			for(c = m->stack; c; c = c->snext) { /* add clients to the list */
 				if(!ISVISIBLE(c)) continue;
-				/* if (HIDDEN(c)) continue; uncomment if you're using awesomebar patch */
+				if (HIDDEN(c)) continue; /* uncomment if you're using awesomebar patch */
 
 				m->altsnext[listIndex++] = c;
 			}
