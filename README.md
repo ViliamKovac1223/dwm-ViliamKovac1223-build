@@ -58,3 +58,8 @@ the DISPLAY environment variable is set correctly, e.g.:
 # Configuration
 The configuration of dwm is done in config.def.h
 and (re)compiling the source code (don't forget to delete config.h before compiling).
+
+# Fake internet money
+If you like my work and want to support me by some fake internet money, here is my monero address
+
+87udnMjHcExZ43797qCeH7hV3saCfrx8GaW8Ung8UDzXXMve2bMyH4qH3jSZEuddQj8S3HB7DkCCkTrttbEKVCSENzaH2St
