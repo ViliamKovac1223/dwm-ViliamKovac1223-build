@@ -13,6 +13,7 @@ I modified some patches.
 
 List of applied patches:
 - [Actual full screen](https://dwm.suckless.org/patches/actualfullscreen/)
+- [Alt-tab], This is my own patch. It'll be on the suckless website soon. Documentation is in patches/alt-tab/
 - [Auto start](https://dwm.suckless.org/patches/autostart/)
 - [Awesome bar](https://dwm.suckless.org/patches/awesomebar/)
 - [Bottom stack](https://dwm.suckless.org/patches/bottomstack/)
