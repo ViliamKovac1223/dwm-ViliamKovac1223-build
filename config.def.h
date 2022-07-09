@@ -11,6 +11,8 @@ static const unsigned int tabPosX 			= 1;	/* tab position on X axis, 0 = left, 1
 static const unsigned int maxWTab 			= 600;	/* tab menu width */
 static const unsigned int maxHTab 			= 200;	/* tab menu height */
 
+#define SESSION_FILE "/tmp/dwm-session"
+
 /* appearance */
 static const unsigned int borderpx 			= 2;	/* border pixel of windows */
 static const unsigned int gappx 			= 4;	/* gaps between windows */
