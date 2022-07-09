@@ -205,7 +205,7 @@ static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
-static void enternotify(XEvent *e);
+/* static void enternotify(XEvent *e); */
 static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
@@ -261,7 +261,7 @@ static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
-static void show(const Arg *arg);
+/* static void show(const Arg *arg); */
 static void showwin(Client *c);
 static void showhide(Client *c);
 static void sigchld(int unused);
@@ -995,6 +995,7 @@ drawbars(void)
 		drawbar(m);
 }
 
+/*
 void
 enternotify(XEvent *e)
 {
@@ -1013,6 +1014,7 @@ enternotify(XEvent *e)
 		return;
 	focus(c);
 }
+*/
 
 void
 expose(XEvent *e)
@@ -1924,7 +1926,8 @@ runautostart(void)
 	}
 
 	if (access(path, X_OK) == 0)
-		system(path);
+		if (system(path) == -1)
+			fprintf(stderr, "Error in runautostart function.\n");
 
 	/* now the non-blocking script */
 	if (sprintf(path, "%s/%s", pathpfx, autostartsh) <= 0) {
@@ -1933,7 +1936,8 @@ runautostart(void)
 	}
 
 	if (access(path, X_OK) == 0)
-		system(strcat(path, " &"));
+		if (system(strcat(path, " &")) == -1)
+			fprintf(stderr, "Error in runautostart function.\n");
 
 	free(pathpfx);
 	free(path);
@@ -2219,9 +2223,11 @@ debug(char * s, int num)
 	message = mergeStrings(message, "'");
 	message = mergeStrings(" '", message);
 	char * command = mergeStrings("notify-send", message);
-	system(command);
+	if (system(command) == -1)
+		fprintf(stderr, "debug command \"%s\" failled.\n", command);
 }
 
+/*
 void
 show(const Arg *arg)
 {
@@ -2229,6 +2235,7 @@ show(const Arg *arg)
 		selmon->hidsel = 0;
 	showwin(selmon->sel);
 }
+*/
 
 void
 unhide(const Arg *arg)
