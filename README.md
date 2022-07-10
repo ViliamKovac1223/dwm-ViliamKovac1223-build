@@ -3,7 +3,7 @@
 dwm is an extremely fast, small, and dynamic window manager for X.
 
 # Preview
-![Alt text](screenshots/preview.png?raw=true "preview of my dwm setup")
+![Screenshot](screenshots/preview.png)
 
 # Defaults
 - Terminal = st
