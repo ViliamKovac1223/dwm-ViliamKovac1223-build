@@ -2,6 +2,7 @@
 
 #define DEBUG_VAL 0
 #define EMOJI_SUPPORT 0
+#define SESSION_FILE "/tmp/dwm-session"
 
 /* alt-tab configuration */
 static const unsigned int tabModKey 		= 0x40;	/* if this key is hold the alt-tab functionality stays acitve. This key must be the same as key that is used to active functin altTabStart `*/
@@ -10,8 +11,6 @@ static const unsigned int tabPosY 			= 1;	/* tab position on Y axis, 0 = bottom,
 static const unsigned int tabPosX 			= 1;	/* tab position on X axis, 0 = left, 1 = center, 2 = right */
 static const unsigned int maxWTab 			= 600;	/* tab menu width */
 static const unsigned int maxHTab 			= 200;	/* tab menu height */
-
-#define SESSION_FILE "/tmp/dwm-session"
 
 /* appearance */
 static const unsigned int borderpx 			= 2;	/* border pixel of windows */
