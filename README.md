@@ -22,6 +22,7 @@ List of applied patches:
 - [Bottom stack](https://dwm.suckless.org/patches/bottomstack/)
 - [Cycle layouts](https://dwm.suckless.org/patches/cyclelayouts/)
 - [Full gaps](https://dwm.suckless.org/patches/fullgaps/)
+- [Fix borders](http://dwm.suckless.org/patches/alpha/)
 - [Grid mode](https://dwm.suckless.org/patches/gridmode/)
 - [Maximize](https://dwm.suckless.org/patches/maximize/)
 - [Pertag](https://dwm.suckless.org/patches/pertag/)
