@@ -2398,21 +2398,21 @@ drawTab(int nwins, int first, Monitor *m)
 		selmon->maxHTab = maxHTab;
 
 		/* decide position of tabwin */
-		int posX = 0;
-		int posY = 0;
+		int posX = selmon->mx;
+		int posY = selmon->my;
 		if (tabPosX == 0)
-			posX = 0;
+			posX += 0;
 		if (tabPosX == 1)
-			posX = (selmon->mw / 2) - (maxWTab / 2);
+			posX += (selmon->mw / 2) - (maxWTab / 2);
 		if (tabPosX == 2)
-			posX = selmon->mw - maxWTab;
+			posX += selmon->mw - maxWTab;
 
 		if (tabPosY == 0)
-			posY = selmon->mh - maxHTab;
+			posY += selmon->mh - maxHTab;
 		if (tabPosY == 1)
-			posY = (selmon->mh / 2) - (maxHTab / 2);
+			posY += (selmon->mh / 2) - (maxHTab / 2);
 		if (tabPosY == 2)
-			posY = 0;
+			posY += 0;
 
 		h = selmon->maxHTab;
 		/* XCreateWindow(display, parent, x, y, width, height, border_width, depth, class, visual, valuemask, attributes); just reference */
