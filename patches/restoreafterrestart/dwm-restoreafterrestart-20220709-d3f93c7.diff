@@ -80,6 +80,7 @@ index 74cec7e..76b40a2 100644
  void
  quit(const Arg *arg)
  {
++	int restart = 0;
  	if(arg->i) restart = 1;
  	running = 0;
 +
