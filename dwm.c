@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -2533,7 +2534,11 @@ altTabStart(const Arg *arg)
 						} else if (event.type == KeyPress) {
 							if (event.xkey.keycode == tabCycleKey) {/* if XK_s is pressed move to the next window */
 								altTab();
-							}
+							} else if (event.xkey.keycode == tabEndKey) {
+		                        selmon->altTabN = 0;
+                                altTabEnd();
+                                break;
+                            }
 						}
 					}
 				}
