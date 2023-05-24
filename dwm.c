@@ -146,6 +146,7 @@ struct Monitor {
 	int wx, wy, ww, wh;   /* window area  */
 	int gappx;            /* gaps between windows */
 	int altTabN;		  /* move that many clients forward */
+    bool altMoveBack;     /* if true the stack of the windows will move backwards at tabCycleKey press */
 	int nTabs;			  /* number of active clients in tag */
 	int isAlt; 			  /* 1,0 */
 	int maxWTab;
@@ -2352,9 +2353,14 @@ altTab()
 {
 	/* move to next window */
 	if (selmon->sel != NULL && selmon->sel->snext != NULL) {
-		selmon->altTabN++;
+        if (selmon->altMoveBack) selmon->altTabN--; /* move backwards */
+        else selmon->altTabN++; /* move forward */
+
 		if (selmon->altTabN >= selmon->nTabs)
 			selmon->altTabN = 0; /* reset altTabN */
+
+		if (selmon->altTabN < 0)
+			selmon->altTabN = selmon->nTabs - 1; /* reset altTabN */
 		
 		focus(selmon->altsnext[selmon->altTabN]);
 		restack(selmon);
@@ -2475,6 +2481,7 @@ drawTab(int nwins, int first, Monitor *m)
 void
 altTabStart(const Arg *arg)
 {
+    selmon->altMoveBack = false;
 	selmon->altsnext = NULL;
 	if (selmon->tabwin)
 		altTabEnd();
@@ -2529,15 +2536,22 @@ altTabStart(const Arg *arg)
 				while (grabbed) {
 					XNextEvent(dpy, &event);
 					if (event.type == KeyPress || event.type == KeyRelease) {
-						if (event.type == KeyRelease && event.xkey.keycode == tabModKey) { /* if super key is released break cycle */
-							break;
-						} else if (event.type == KeyPress) {
-							if (event.xkey.keycode == tabCycleKey) {/* if XK_s is pressed move to the next window */
+						if (event.type == KeyRelease) { /* triggers for key releases */
+                            if( event.xkey.keycode == tabModKey) /* if super key is released break cycle */
+							    break;
+
+                            if( event.xkey.keycode == tabMoveBackKey) /* if tabMoveBackKey is pressed stop moving windows in reverse order */
+                                selmon->altMoveBack = false;
+							    
+						} else if (event.type == KeyPress) { /* triggers for key presses */
+							if (event.xkey.keycode == tabCycleKey) { /* if XK_s is pressed move to the next window */
 								altTab();
 							} else if (event.xkey.keycode == tabEndKey) {
 		                        selmon->altTabN = 0;
                                 altTabEnd();
                                 break;
+							} else if (event.xkey.keycode == tabMoveBackKey) {
+                                selmon->altMoveBack = true;
                             }
 						}
 					}
