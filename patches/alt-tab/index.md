@@ -11,6 +11,7 @@ Configuration Options
 * `tabModKey` - If this key is hold the alt-tab functionality stays active. This key must be the same as key that is used to active function altTabStart 
 * `tabCycleKey` - If this key is hit the alt-tab program moves one position forward in clients stack. This key must be the same as key that is used to active function altTabStart
 * `tabEndKey`- If this key is hit the while you're in the alt-tab mode, you'll be returned to previous state (alt-tab mode turned off and your window of origin will be selected)
+* `tabMoveBackKey` - If this key is being hold while hitting tabCycleKey you'll move in stack of windows backwards
 * `tabPosY` - Tab position on Y axis, 0 = bottom, 1 = center, 2 = top
 * `tabPosX` - Tab position on X axis, 0 = left, 1 = center, 2 = right
 * `maxWTab` - Tab menu width
@@ -40,7 +41,8 @@ Download
 --------
 * [dwm-alttab-20220709-d3f93c7.diff](dwm-alttab-20220709-d3f93c7.diff)
 * [dwm-alttab-6.4.diff](dwm-alttab-6.4.diff)
-* [dwm-alttab-20230522-56519c4.diff](dwm-alttab-20230522-56519c4.diff) LATEST
+* [dwm-alttab-20230522-56519c4.diff](dwm-alttab-20230522-56519c4.diff)
+* [dwm-alttab-20230525-35c66c3.diff](dwm-alttab-20230525-35c66c3.diff) LATEST
 * [get-xkey.c](get-xkey.c)
 
 Authors
