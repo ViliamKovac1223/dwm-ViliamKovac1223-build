@@ -1,5 +1,12 @@
 #!/bin/sh
-amixer | grep "'Capture',0" -A 5 | tail -n 1 | awk '{ print $5$6 }' | sed -e 's/\[//g' -e 's/\]//g' -e 's/off/!/' -e 's/on//'
-# '  '
-#'  '
+# icon for microphone   
+
+volume=$(pactl list sources | grep "Source #[0-9]" -A 9 | tail -n1 | awk '{print $5}')
+muted=$( pactl list sources | grep "Source #[0-9]" -A 8 | tail -n1 | awk '{print $2}')
+
+if [ "$muted" = "no" ]; then
+    echo "$volume";
+else
+    echo "!$volume";
+fi
 
