@@ -27,7 +27,7 @@ static const int showbar 					= 1;	/* 0 means no bar */
 static const int topbar 					= 1;	/* 0 means bottom bar */
 
 // static const char *fonts[]          = { "monospace:size=10", "JoyPixels:pixelsize=10:antialias=true:autohint=true"
-static const char *fonts[] 		= {"sans:size=10", "JoyPixels:pixelsize=10:antialias=true:autohint=true", "hack", "IcoMoon-Free:pixelsize=10:antialias=true:autohint=true"};
+static const char *fonts[] 		= {"sans:size=11", "JoyPixels:pixelsize=10:antialias=true:autohint=true", "hack", "IcoMoon-Free:pixelsize=10:antialias=true:autohint=true"};
 static const char dmenufont[] 	= "monospace:size=10";
 
 /* 
@@ -146,6 +146,7 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_equal,  setgaps,			{.i = 0  } },
 	{ MODKEY|ControlMask,           XK_n,      unhide,			{0} },
 	{ MODKEY,             			XK_n,      hide,			{0} },
+    { MODKEY|ShiftMask,             XK_s,      showall,         {0} },
 	{ MODKEY,                       XK_m,      togglemaximize,	{0} },
 	// GROUP call_scripts
 	{ ControlMask|ShiftMask,        XK_m,      spawn,			SHCMD("$HOME/.local/src/dwm/scripts/toggle-mic.sh; pkill -RTMIN+13 dwmblocks") },
