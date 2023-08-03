@@ -276,6 +276,7 @@ static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
 static void tile(Monitor *m);
 static void togglebar(const Arg *arg);
+static void toggleborder(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglefullscr(const Arg *arg);
 static void toggletag(const Arg *arg);
@@ -916,9 +917,8 @@ drawbar(Monitor *m)
 	unsigned int i, occ = 0, urg = 0;
 	Client *c;
 
-	if(showsystray && m == systraytomon(m) && !systrayonleft)
+	if (showsystray && m == systraytomon(m) && !systrayonleft)
 		stw = getsystraywidth();
-
 
 	if (!m->showbar)
 		return;
@@ -956,7 +956,13 @@ drawbar(Monitor *m)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-	if ((w = m->ww - tw - stw - x) > bh) {
+    /* Update stw (systray widht) for calculating width of individual tab width */
+    int realStw = stw;
+	if (showsystray && m == systraytomon(m))
+		realStw = getsystraywidth();
+    if (realStw != 0) realStw -= 1;
+
+	if ((w = m->ww - tw - realStw - x) > bh) {
 		if (n > 0) {
 			int remainder = w % n;
 	        int tabw = (1.0 / (double)n) * w + 1;
@@ -971,13 +977,27 @@ drawbar(Monitor *m)
 					scm = SchemeNorm;
 				drw_setscheme(drw, scheme[scm]);
 
+                // TODO try to remove
+
+                // XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
+		        // XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, m->my - m->wy, tw, m->mh - m->wh);
+
+		        // XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, a->y, tw, a->h);
+		        // XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, m->btw, tw, m->mh - m->wh);
+
+
+
 				if (remainder >= 0) {
 					if (remainder == 0) {
 						tabw--;
 					}
 					remainder--;
 				}
+
 				drw_text(drw, x, 0, tabw, bh, lrpad / 2, c->name, 0);
+
+                // TODO try to remove
+				// x += tabw + (i < remainder ? 1: 0);
 				x += tabw;
 			}
 		} else {
@@ -2055,6 +2075,7 @@ void
 setfullscreen(Client *c, int fullscreen)
 {
 	if (fullscreen && !c->isfullscreen) {
+        /* Set property of window to full screen */
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
 			PropModeReplace, (unsigned char*)&netatom[NetWMFullscreen], 1);
 		c->isfullscreen = 1;
@@ -2065,6 +2086,7 @@ setfullscreen(Client *c, int fullscreen)
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
 	} else if (!fullscreen && c->isfullscreen){
+        /* Delete full screen property from a window */
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
 			PropModeReplace, (unsigned char*)0, 0);
 		c->isfullscreen = 0;
@@ -2077,6 +2099,9 @@ setfullscreen(Client *c, int fullscreen)
 		resizeclient(c, c->x, c->y, c->w, c->h);
 		arrange(c->mon);
 	}
+
+    // hidewin(c);
+    // showwin(c);
 }
 
 void
@@ -2654,6 +2679,13 @@ togglebar(const Arg *arg)
 		XConfigureWindow(dpy, systray->win, CWY, &wc);
 	}
 	arrange(selmon);
+}
+
+void
+toggleborder(const Arg *arg)
+{
+    selmon->sel->bw = (selmon->sel->bw == borderpx ? 0 : borderpx);
+    arrange(selmon);
 }
 
 void

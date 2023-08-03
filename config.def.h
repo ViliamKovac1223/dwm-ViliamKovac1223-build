@@ -109,11 +109,13 @@ static const Key keys[] = {
 	// GROUP spawn
 	{ MODKEY,                       XK_r,      spawn,			{.v = dmenucmd } },
 	{ MODKEY,                       XK_Return, spawn,			{.v = termcmd } },
+	{ MODKEY|ShiftMask,             XK_Return, spawn,			SHCMD("neovide") },
 	{ 0,                            XK_Print,  spawn,			SHCMD("mate-screenshot") },
 	{ ShiftMask,                    XK_Print,  spawn,			SHCMD("flameshot gui") },
 	{ Mod1Mask|ControlMask,         XK_l,      spawn,			SHCMD("slock") },
 	// GROUP wm_basic
 	{ MODKEY,                       XK_b,      togglebar,		{0} },
+    { MODKEY|ShiftMask,             XK_b,      toggleborder,    {0} },
 	{ MODKEY,                       XK_j,      focusstackvis,	{.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstackvis,	{.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_j,      focusstackhid,	{.i = +1 } },
