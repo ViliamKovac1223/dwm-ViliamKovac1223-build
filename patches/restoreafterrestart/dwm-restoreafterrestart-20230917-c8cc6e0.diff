@@ -1,0 +1,172 @@
+From c8cc6e0b53252229595c49fdb9fc092112e545fc Mon Sep 17 00:00:00 2001
+From: ViliamKovac1223 <viliamkovac1223@gmail.com>
+Date: Sun, 17 Sep 2023 02:04:10 +0200
+Subject: [PATCH] patch update, return to previously focused window
+
+---
+ config.def.h |  2 ++
+ dwm.c        | 97 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 99 insertions(+)
+
+diff --git a/config.def.h b/config.def.h
+index 9efa774..a299cc3 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -1,4 +1,5 @@
+ /* See LICENSE file for copyright and license details. */
++#define SESSION_FILE "/tmp/dwm-session"
+ 
+ /* appearance */
+ static const unsigned int borderpx  = 1;        /* border pixel of windows */
+@@ -95,6 +96,7 @@ static const Key keys[] = {
+ 	TAGKEYS(                        XK_8,                      7)
+ 	TAGKEYS(                        XK_9,                      8)
+ 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
++	{ MODKEY|ControlMask,           XK_r,      quit,           {1} }, 
+ };
+ 
+ /* button definitions */
+diff --git a/dwm.c b/dwm.c
+index 253aba7..e863f8e 100644
+--- a/dwm.c
++++ b/dwm.c
+@@ -26,6 +26,7 @@
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdbool.h>
+ #include <string.h>
+ #include <unistd.h>
+ #include <sys/types.h>
+@@ -57,6 +58,8 @@
+ #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
+ #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
+ 
++#define RESTORE_PATCH_SEL_PREFIX "Selected: "
++
+ /* enums */
+ enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
+ enum { SchemeNorm, SchemeSel }; /* color schemes */
+@@ -261,6 +264,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
+ 	[UnmapNotify] = unmapnotify
+ };
+ static Atom wmatom[WMLast], netatom[NetLast];
++static int restart = 0;
+ static int running = 1;
+ static Cur *cursor[CurLast];
+ static Clr **scheme;
+@@ -1246,10 +1250,101 @@ propertynotify(XEvent *e)
+ 	}
+ }
+ 
++void
++saveSession(void)
++{
++    FILE *fw = fopen(SESSION_FILE, "w");
++    for (Client *c = selmon->clients; c != NULL; c = c->next) { // get all the clients with their tags and write them to the file
++	    fprintf(fw, "%lu %u\n", c->win, c->tags);
++	}
++
++    // Write selected client to the file
++    if (selmon->sel != NULL) {
++        fprintf(fw, RESTORE_PATCH_SEL_PREFIX"%lu %u\n", selmon->sel->win, selmon->sel->tags);
++    }
++
++    fclose(fw);
++}
++
++void
++restoreSession(void)
++{
++	// restore session
++	FILE *fr = fopen(SESSION_FILE, "r");
++	if (!fr)
++		return;
++
++    int wasFocused = false;
++    Client * lastFocusedClient = NULL;
++    unsigned int lastFocusedClientTag = 0;
++
++	char *str = malloc(23 * sizeof(char)); // allocate enough space for excepted input from text file
++	while (fscanf(fr, "%[^\n] ", str) != EOF) { // read file till the end
++		long unsigned int winId;
++		unsigned int tagsForWin;
++
++        // Check fo selected window first
++        if (!wasFocused) {
++            int check = sscanf(str, RESTORE_PATCH_SEL_PREFIX"%lu %u", &winId, &tagsForWin); // get data
++            if (check == 2) {
++                lastFocusedClientTag = tagsForWin;
++                for (Client * c = selmon->clients; c != NULL; c = c->next) {
++                    if (winId == c->win) {
++                        lastFocusedClient = c;
++                        wasFocused = true;
++                        break;
++                    }
++                }
++            }
++        }
++
++		int check = sscanf(str, "%lu %u", &winId, &tagsForWin); // get data
++		if (check != 2) // break loop if data wasn't read correctly
++			break;
++		
++		for (Client *c = selmon->clients; c ; c = c->next) { // add tags to every window by winId
++			if (c->win == winId) {
++				c->tags = tagsForWin;
++				break;
++			}
++		}
++    }
++
++	for (Client *c = selmon->clients; c ; c = c->next) { // refocus on windows
++		focus(c);
++		restack(c->mon);
++	}
++
++	for (Monitor *m = selmon; m; m = m->next) // rearrange all monitors
++		arrange(m);
++
++    // Focus on last focused client
++    if (wasFocused == true) {
++        // Change tag
++        Arg arg;
++        arg.ui = lastFocusedClientTag;
++        view(&arg);
++
++        // Focus client
++        focus(lastFocusedClient);
++		restack(lastFocusedClient->mon);
++    }
++
++	free(str);
++	fclose(fr);
++	
++	// delete a file
++	remove(SESSION_FILE);
++}
++
+ void
+ quit(const Arg *arg)
+ {
++ 	if(arg->i) restart = 1;
+ 	running = 0;
++
++	if (restart == 1)
++		saveSession();
+ }
+ 
+ Monitor *
+@@ -2142,7 +2237,9 @@ main(int argc, char *argv[])
+ 		die("pledge");
+ #endif /* __OpenBSD__ */
+ 	scan();
++	restoreSession();
+ 	run();
++ 	if(restart) execvp(argv[0], argv);
+ 	cleanup();
+ 	XCloseDisplay(dpy);
+ 	return EXIT_SUCCESS;
+-- 
+2.39.2
+

@@ -22,6 +22,8 @@ This patch is also hosted on my [github](https://github.com/ViliamKovac1223/dwm-
 Download
 --------
 * [dwm-restoreafterrestart-20220709-d3f93c7.diff](dwm-restoreafterrestart-20220709-d3f93c7.diff)
+* [dwm-restoreafterrestart-20221113-c2b748e.diff](dwm-restoreafterrestart-20221113-c2b748e.diff)
+* [dwm-restoreafterrestart-20230917-c8cc6e0.diff](dwm-restoreafterrestart-20230917-c8cc6e0.diff) LATEST
 
 Authors
 -------

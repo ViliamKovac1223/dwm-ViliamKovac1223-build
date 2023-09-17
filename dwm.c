@@ -77,6 +77,8 @@
 #define VERSION_MINOR               0
 #define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
 
+#define RESTORE_PATCH_SEL_PREFIX "Selected: "
+
 /* enums */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel, SchemeHid }; /* color schemes */
@@ -1666,6 +1668,12 @@ saveSession(void)
 	for (Client *c = selmon->clients; c != NULL; c = c->next) { // get all the clients with their tags and write them to the file
 		fprintf(fw, "%lu %u\n", c->win, c->tags);
 	}
+
+    // Write selected client to the file
+    if (selmon->sel != NULL) {
+        fprintf(fw, RESTORE_PATCH_SEL_PREFIX"%lu %u\n", selmon->sel->win, selmon->sel->tags);
+    }
+
 	fclose(fw);
 }
 
@@ -1677,10 +1685,30 @@ restoreSession(void)
 	if (!fr)
 		return;
 
+    int wasFocused = false;
+    Client * lastFocusedClient = NULL;
+    unsigned int lastFocusedClientTag = 0;
+
 	char *str = malloc(23 * sizeof(char)); // allocate enough space for excepted input from text file
 	while (fscanf(fr, "%[^\n] ", str) != EOF) { // read file till the end
 		long unsigned int winId;
 		unsigned int tagsForWin;
+
+        // Check fo selected window first
+        if (!wasFocused) {
+            int check = sscanf(str, RESTORE_PATCH_SEL_PREFIX"%lu %u", &winId, &tagsForWin); // get data
+            if (check == 2) {
+                lastFocusedClientTag = tagsForWin;
+                for (Client * c = selmon->clients; c != NULL; c = c->next) {
+                    if (winId == c->win) {
+                        lastFocusedClient = c;
+                        wasFocused = true;
+                        break;
+                    }
+                }
+            }
+        }
+
 		int check = sscanf(str, "%lu %u", &winId, &tagsForWin); // get data
 		if (check != 2) // break loop if data wasn't read correctly
 			break;
@@ -1700,6 +1728,18 @@ restoreSession(void)
 
 	for (Monitor *m = selmon; m; m = m->next) // rearrange all monitors
 		arrange(m);
+
+    // Focus on last focused client
+    if (wasFocused == true) {
+        // Change tag
+        Arg arg;
+        arg.ui = lastFocusedClientTag;
+        view(&arg);
+
+        // Focus client
+        focus(lastFocusedClient);
+		restack(lastFocusedClient->mon);
+    }
 
 	free(str);
 	fclose(fr);
@@ -3231,8 +3271,6 @@ view(const Arg *arg)
 
 	if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 		togglebar(NULL);
-
-
 
 	focus(NULL);
 	arrange(selmon);
