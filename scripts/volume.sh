@@ -6,8 +6,10 @@ volume=$(pactl list sinks | grep -e '^[[:space:]]Volume:' | awk '{print $5}')
 muted=$(pactl list sinks | grep '^[[:space:]]Mute:' | head -n 1 | awk '{print $2}')
 
 if [ "$muted" = "no" ]; then
-    echo "$volume";
+    echo "  $volume";
+    # echo "󰝝 $volume";
 else
-    echo "$volume";
+    echo "󰖁  $volume";
+    # echo "󰝟 $volume";
 fi
 

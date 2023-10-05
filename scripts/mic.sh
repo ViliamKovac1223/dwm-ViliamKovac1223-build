@@ -11,8 +11,8 @@ fi
 # muted=$( pactl list sources | grep "Source #[0-9]" -A 8 | tail -n1 | awk '{print $2}')
 
 if [ "$muted" = "no" ]; then
-    echo "$volume";
+    echo "  $volume";
 else
-    echo "!$volume";
+    echo "  $volume";
 fi
 

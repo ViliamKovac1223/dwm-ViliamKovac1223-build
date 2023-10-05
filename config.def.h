@@ -27,7 +27,13 @@ static const int showbar 					= 1;	/* 0 means no bar */
 static const int topbar 					= 1;	/* 0 means bottom bar */
 
 // static const char *fonts[]          = { "monospace:size=10", "JoyPixels:pixelsize=10:antialias=true:autohint=true"
-static const char *fonts[] 		= {"sans:size=11", "JoyPixels:pixelsize=10:antialias=true:autohint=true", "hack", "IcoMoon-Free:pixelsize=10:antialias=true:autohint=true"};
+static const char *fonts[] = {"sans:size=11",
+    "HackNerdFont-Regular:size=12:antialias=true:autohint=true",
+    // "JoyPixels:size=32:antialias=true:autohint=true",
+    "hack:size=32:antialias=true:autohint=true",
+    "IcoMoon-Free:size=32:antialias=true:autohint=true"
+};
+
 static const char dmenufont[] 	= "monospace:size=10";
 
 /* 
@@ -52,7 +58,7 @@ static const char *colors[][3]      = {
 };
 
 /* tagging */
-static const char *tags[] = { "", "", "", "", "", "", "7", "8", "9"};
+static const char *tags[] = { "", "󰇧", "󰅬", "󰈭", "󰋋", "󰴓", "7", "8", "9"};
 
 static const Rule rules[] = {
 	/* xprop(1):
