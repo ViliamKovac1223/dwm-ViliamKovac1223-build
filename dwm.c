@@ -311,6 +311,7 @@ static void zoom(const Arg *arg);
 void drawTab(int nwins, int first, Monitor *m);
 void altTabStart(const Arg *arg);
 static void altTabEnd();
+static void raiseNotificationWindows(Monitor * m);
 
 /* variables */
 static Systray *systray =  NULL;
@@ -499,8 +500,10 @@ void
 arrangemon(Monitor *m)
 {
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-	if (m->lt[m->sellt]->arrange)
-		m->lt[m->sellt]->arrange(m);
+    if (m->lt[m->sellt]->arrange)
+        m->lt[m->sellt]->arrange(m);
+    else
+        raiseNotificationWindows(m);
 }
 
 void
@@ -1057,6 +1060,20 @@ expose(XEvent *e)
 }
 
 void
+raiseNotificationWindows(Monitor * m)
+{
+    if (!m) return ;
+
+    for (Client * c = m->clients; c; c = c->next) {
+        Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
+        if (wtype == netatom[NetWMWindowType] && c->neverfocus)
+            XRaiseWindow(dpy, c->win);
+
+        resize(c, c->x, c->y, c->w, c->h, 0);
+    }
+}
+
+void
 focus(Client *c)
 {
 	// don't raise floating window functionality
@@ -1102,6 +1119,8 @@ focus(Client *c)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+
+    raiseNotificationWindows(selmon);
 	selmon->sel = c;
 	drawbars();
 }
@@ -1474,6 +1493,7 @@ manage(Window w, XWindowAttributes *wa)
 		) {
 			XRaiseWindow(dpy, c->win);
 		}
+    raiseNotificationWindows(selmon);
 	// end don't raise floating window functionality
 
 }
@@ -1907,8 +1927,12 @@ restack(Monitor *m)
 	drawbar(m);
 	if (!m->sel)
 		return;
-	if (m->sel->isfloating || !m->lt[m->sellt]->arrange)
+    // if (m->pertag->sellts[selmon->pertag->curtag] != 0 && m->sel->isfloating) // if floating layout is not selected
+		// XRaiseWindow(dpy, m->sel->win);
+	if (m->sel->isfloating || !m->lt[m->sellt]->arrange) {
 		XRaiseWindow(dpy, m->sel->win);
+        raiseNotificationWindows(m);
+    }
 	if (m->lt[m->sellt]->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = m->barwin;
@@ -1918,6 +1942,8 @@ restack(Monitor *m)
 				wc.sibling = c->win;
 			}
 	}
+
+    raiseNotificationWindows(m);
 	XSync(dpy, False);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
@@ -2340,22 +2366,23 @@ unhide(const Arg *arg)
 	if (selmon->hidsel)
 		selmon->hidsel = 0;
 
-	Client * c = selmon->clients;
-	while (1) {
-		if (c == NULL)
-			break;
-		// if (HIDDEN(c) && c->tags == selmon->seltag)
+	// Client * c = selmon->clients;
+    Client * c = NULL;
+
+	for(c = selmon->clients; c; c = c->next) {
+        // Make sure that all clients are in this tag
+		if(!ISVISIBLE(c)) continue;
+
 		if (HIDDEN(c))
 			break;
-
-		c = c->next;
 	}
 
-	if (c != NULL && HIDDEN(c))
-		showwin(c);
+    if (c == NULL || !HIDDEN(c)) return ;
 
-	focus(c);
-	restack(selmon);
+    // Unhide client and refocus on it
+    showwin(c);
+    focus(c);
+    restack(selmon);
 }
 
 
@@ -2453,6 +2480,7 @@ altTab()
 	/* redraw tab */
 	XRaiseWindow(dpy, selmon->tabwin);
 	drawTab(selmon->nTabs, 0, selmon);
+    raiseNotificationWindows(selmon);
 }
 
 void
@@ -2491,6 +2519,8 @@ altTabEnd()
 	selmon->nTabs = 0;
 	XUnmapWindow(dpy, selmon->tabwin);
 	XDestroyWindow(dpy, selmon->tabwin);
+
+    raiseNotificationWindows(selmon);
 }
 
 void
