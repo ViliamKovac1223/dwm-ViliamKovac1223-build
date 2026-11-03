@@ -510,7 +510,7 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
-	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
+	snprintf(m->ltsymbol, sizeof(m->ltsymbol), "%s", m->lt[m->sellt]->symbol);
     if (m->lt[m->sellt]->arrange)
         m->lt[m->sellt]->arrange(m);
     else
@@ -625,7 +625,7 @@ cleanup(void)
 	for (i = 0; i < CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors); i++)
-		free(scheme[i]);
+		drw_scm_free(drw, scheme[i], 3);
 	free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
@@ -746,6 +746,9 @@ configurenotify(XEvent *e)
 
 	/* TODO: updategeom handling sucks, needs to be simplified */
 	if (ev->window == root) {
+		if (ev->width <= 0 || ev->height <= 0)
+			return;
+
 		dirty = (sw != ev->width || sh != ev->height);
 		sw = ev->width;
 		sh = ev->height;
@@ -832,7 +835,7 @@ createmon(void)
 	m->lt[0] = &layouts[0];
 	m->lt[1] = &layouts[1 % LENGTH(layouts)];
 	m->nTabs = 0;
-	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
+	snprintf(m->ltsymbol, sizeof(m->ltsymbol), "%s", layouts[0].symbol);
 	m->pertag = ecalloc(1, sizeof(Pertag));
 	m->pertag->curtag = m->pertag->prevtag = 1;
 	m->seltag = 1;
@@ -1221,8 +1224,8 @@ focusstack(int inc, int hid)
 Atom
 getatomprop(Client *c, Atom prop)
 {
-	int di;
-	unsigned long dl;
+	int format;
+	unsigned long nitems, dl;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
 	/* FIXME getatomprop should return the number of items and a pointer to
@@ -1232,8 +1235,9 @@ getatomprop(Client *c, Atom prop)
 		req = xatom[XembedInfo];
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
-		&da, &di, &dl, &dl, &p) == Success && p) {
-		atom = *(Atom *)p;
+		&da, &format, &nitems, &dl, &p) == Success && p) {
+		if (nitems > 0 && format == 32)
+			atom = *(Atom *)p;
 		if (da == xatom[XembedInfo] && dl == 2)
 			atom = ((Atom *)p)[1];
 		XFree(p);
@@ -1261,10 +1265,10 @@ getstate(Window w)
 	Atom real;
 
 	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-		&real, &format, &n, &extra, (unsigned char **)&p) != Success)
+		&real, &format, &n, &extra, &p) != Success)
 		return -1;
-	if (n != 0)
-		result = *p;
+	if (n != 0 && format == 32)
+		result = *(long *)p;
 	XFree(p);
 	return result;
 }
@@ -1292,12 +1296,12 @@ gettextprop(Window w, Atom atom, char *text, unsigned int size)
 	if (!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
 		return 0;
 	if (name.encoding == XA_STRING) {
-		strncpy(text, (char *)name.value, size - 1);
-	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
-		strncpy(text, *list, size - 1);
+		snprintf(text, size, "%s", (char *)name.value);
+	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success) {
+		if (n > 0 && *list)
+			snprintf(text, size, "%s", *list);
 		XFreeStringList(list);
 	}
-	text[size - 1] = '\0';
 	XFree(name.value);
 	return 1;
 }
@@ -1496,7 +1500,7 @@ manage(Window w, XWindowAttributes *wa)
 	focus(NULL);
 
 	// don't raise floating window functionality
-	if(c 
+	if(c
 		&& ISVISIBLE(c)
 		&& !HIDDEN(c)
 		// && c->tags == selmon->seltag
@@ -1599,7 +1603,7 @@ movemouse(const Arg *arg)
 			handler[ev.type](&ev);
 			break;
 		case MotionNotify:
-			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
+			if ((ev.xmotion.time - lasttime) <= (1000 / refreshrate))
 				continue;
 			lasttime = ev.xmotion.time;
 
@@ -1743,7 +1747,7 @@ restoreSession(void)
 		int check = sscanf(str, "%lu %u", &winId, &tagsForWin); // get data
 		if (check != 2) // break loop if data wasn't read correctly
 			break;
-		
+
 		for (Client *c = selmon->clients; c ; c = c->next) { // add tags to every window by winId
 			if (c->win == winId) {
 				c->tags = tagsForWin;
@@ -1774,7 +1778,7 @@ restoreSession(void)
 
 	free(str);
 	fclose(fr);
-	
+
 	// delete a file
 	remove(SESSION_FILE);
 }
@@ -1794,7 +1798,7 @@ quit(const Arg *arg)
 
 	if(arg->i) restart = 1;
 		running = 0;
-		
+
 	if (restart == 1)
 		saveSession();
 
@@ -1887,7 +1891,7 @@ resizemouse(const Arg *arg)
 			handler[ev.type](&ev);
 			break;
 		case MotionNotify:
-			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
+			if ((ev.xmotion.time - lasttime) <= (1000 / refreshrate))
 				continue;
 			lasttime = ev.xmotion.time;
 
@@ -2099,6 +2103,8 @@ sendmon(Client *c, Monitor *m)
 	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 	attach(c);
 	attachstack(c);
+	if (c->isfullscreen)
+		resizeclient(c, m->mx, m->my, m->mw, m->mh);
 	focus(NULL);
 	arrange(NULL);
 }
@@ -2209,7 +2215,7 @@ setlayout(const Arg *arg)
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
 	if (arg && arg->v)
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
-	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
+	snprintf(selmon->ltsymbol, sizeof(selmon->ltsymbol), "%s", selmon->lt[selmon->sellt]->symbol);
 	if (selmon->sel)
 		arrange(selmon);
 	else
@@ -2463,10 +2469,16 @@ void
 spawn(const Arg *arg)
 {
 	struct sigaction sa;
+	pid_t pid;
 
 	if (arg->v == dmenucmd)
-		dmenumon[0] = '0' + selmon->num;
-	if (fork() == 0) {
+		snprintf(dmenumon, sizeof(dmenumon), "%d", selmon->num);
+
+	if ((pid = fork()) == -1) {
+		fprintf(stderr, "dwm: fork failed: %s\n", strerror(errno));
+		return;
+	}
+	if (pid == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		setsid();
@@ -2494,7 +2506,7 @@ altTab()
 
 		if (selmon->altTabN < 0)
 			selmon->altTabN = selmon->nTabs - 1; /* reset altTabN */
-		
+
 		focus(selmon->altsnext[selmon->altTabN]);
 		restack(selmon);
 	}
@@ -2511,9 +2523,9 @@ altTabEnd()
 	if (selmon->isAlt == 0)
 		return;
 
-	/* 
+	/*
 	* move all clients between 1st and choosen position,
-	* one down in stack and put choosen client to the first position 
+	* one down in stack and put choosen client to the first position
 	* so they remain in right order for the next time that alt-tab is used
 	*/
 	if (selmon->nTabs > 1) {
@@ -2678,7 +2690,7 @@ altTabStart(const Arg *arg)
 
                             if( event.xkey.keycode == tabMoveBackKey) /* if tabMoveBackKey is pressed stop moving windows in reverse order */
                                 selmon->altMoveBack = false;
-							    
+
 						} else if (event.type == KeyPress) { /* triggers for key presses */
 							if (event.xkey.keycode == tabCycleKey) { /* if XK_s is pressed move to the next window */
 								altTab();
@@ -2693,7 +2705,7 @@ altTabStart(const Arg *arg)
 					}
 				}
 
-				c = selmon->sel; 
+				c = selmon->sel;
 				altTabEnd(); /* end the alt-tab functionality */
 				/* XUngrabKeyboard(display, time); just a reference */
 				XUngrabKeyboard(dpy, CurrentTime); /* stop taking all input from keyboard */
@@ -3002,7 +3014,7 @@ updatebarpos(Monitor *m)
 }
 
 void
-updateclientlist()
+updateclientlist(void)
 {
 	Client *c;
 	Monitor *m;
@@ -3100,7 +3112,8 @@ updatenumlockmask(void)
 	XModifierKeymap *modmap;
 
 	numlockmask = 0;
-	modmap = XGetModifierMapping(dpy);
+	if (!(modmap = XGetModifierMapping(dpy)))
+		return;
 	for (i = 0; i < 8; i++)
 		for (j = 0; j < modmap->max_keypermod; j++)
 			if (modmap->modifiermap[i * modmap->max_keypermod + j]
@@ -3119,32 +3132,32 @@ updatesizehints(Client *c)
 		/* size is uninitialized, ensure that size.flags aren't used */
 		size.flags = PSize;
 	if (size.flags & PBaseSize) {
-		c->basew = size.base_width;
-		c->baseh = size.base_height;
+		c->basew = MAX(0, size.base_width);
+		c->baseh = MAX(0, size.base_height);
 	} else if (size.flags & PMinSize) {
-		c->basew = size.min_width;
-		c->baseh = size.min_height;
+		c->basew = MAX(0, size.min_width);
+		c->baseh = MAX(0, size.min_height);
 	} else
 		c->basew = c->baseh = 0;
 	if (size.flags & PResizeInc) {
-		c->incw = size.width_inc;
-		c->inch = size.height_inc;
+		c->incw = MAX(0, size.width_inc);
+		c->inch = MAX(0, size.height_inc);
 	} else
 		c->incw = c->inch = 0;
 	if (size.flags & PMaxSize) {
-		c->maxw = size.max_width;
-		c->maxh = size.max_height;
+		c->maxw = MAX(0, size.max_width);
+		c->maxh = MAX(0, size.max_height);
 	} else
 		c->maxw = c->maxh = 0;
 	if (size.flags & PMinSize) {
-		c->minw = size.min_width;
-		c->minh = size.min_height;
+		c->minw = MAX(0, size.min_width);
+		c->minh = MAX(0, size.min_height);
 	} else if (size.flags & PBaseSize) {
-		c->minw = size.base_width;
-		c->minh = size.base_height;
+		c->minw = MAX(0, size.base_width);
+		c->minh = MAX(0, size.base_height);
 	} else
 		c->minw = c->minh = 0;
-	if (size.flags & PAspect) {
+	if ((size.flags & PAspect) && size.min_aspect.x > 0 && size.max_aspect.y > 0) {
 		c->mina = (float)size.min_aspect.y / size.min_aspect.x;
 		c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
 	} else
