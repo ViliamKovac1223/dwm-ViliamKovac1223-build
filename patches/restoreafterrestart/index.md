@@ -5,7 +5,8 @@ Description
 -----------
 After restarting your dwm all your windows/clients are all in one tag, first tag.
 Well no more, This patch save tag of every window/client to the file and after dwm is restarted
-the file is read and used to get all the windows/clients in their previous tags.
+the file is read and used to get all the windows/clients in their previous tags. It also saves
+which monitor every window/client was on and restores it there.
 
 Configuration Options
 ---------------------
@@ -23,7 +24,8 @@ Download
 --------
 * [dwm-restoreafterrestart-20220709-d3f93c7.diff](dwm-restoreafterrestart-20220709-d3f93c7.diff)
 * [dwm-restoreafterrestart-20221113-c2b748e.diff](dwm-restoreafterrestart-20221113-c2b748e.diff)
-* [dwm-restoreafterrestart-20230917-c8cc6e0.diff](dwm-restoreafterrestart-20230917-c8cc6e0.diff) LATEST
+* [dwm-restoreafterrestart-20230917-c8cc6e0.diff](dwm-restoreafterrestart-20230917-c8cc6e0.diff)
+* [dwm-restoreafterrestart-20261113-1563572.diff](dwm-restoreafterrestart-20261113-1563572.diff) LATEST
 
 Authors
 -------
